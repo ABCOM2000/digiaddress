@@ -1,5 +1,4 @@
 <?php
-//error_reporting(0);
 header("Access-Control-Allow-Origin: *");
 $postdata = file_get_contents("php://input");
 
@@ -19,7 +18,6 @@ if(!empty($error))
 else
 {
     $conn = $obj->dbConnect();
-    $data["latlong"] = $obj->fetchlatlong($conn, $from_data->digiaddress);
+    $data["latlng"] = $obj->fetchlatlong($conn, $from_data->digiaddress);
 }
 echo json_encode($data);
-?>

@@ -81,8 +81,10 @@
         <div class="col-sm-8 map-align" ng-init="initMap()">
             <div id="map" class="extra-padding" style="height: 100%;
             margin-bottom: 15px;"></div>
-            <div class="alert alert-color rounded-0" id="lt" ng-show="latlng" ng-model="lt"></div>
-            <div class="alert alert-color rounded-0" id="padd" ng-show="address" ng-model="padd"></div>
+            <div class="alert alert-color rounded-0"">
+            <label id="lt" ng-show="latlng" ng-model="lt"></label><br/>
+                <label id="padd" ng-show="address" ng-model="padd"></label>
+            </div>
         </div>
 
     </div>

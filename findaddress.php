@@ -41,7 +41,7 @@
             <br>
         </div>
         <div class="col-sm-8 map-align" ng-init="initMap()">
-            <div id="map" class="extra-padding" style="height: 100%;margin-bottom: 15px;"></div>
+            <div id="map" class="extra-padding" style="height: 200%;margin-bottom: 15px;"></div>
         </div>
 
     </div>

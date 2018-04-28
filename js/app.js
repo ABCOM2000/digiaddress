@@ -118,8 +118,7 @@ app.controller('digiAddressGenerator', function ($scope, $http) {
                             geoAddressLabel.html("Geo Address: " + fullAddress);
 
 
-                            // $scope.latlng = true;
-                            // $scope.addr = true;
+                            $scope.latlng = true;
 
                             if (results.data.geometry.viewport) {
 
@@ -157,26 +156,6 @@ app.controller('digiAddressGenerator', function ($scope, $http) {
             }
         }
     };
-
-    //
-    // function getAddress(latlong) {
-    //     geocoder.geocode({
-    //         'latLng': latlong
-    //     }, function (results, status) {
-    //         if (status === google.maps.GeocoderStatus.OK) {
-    //             if (results[1]) {
-    //                 console.log(results[1].formatted_address);
-    //                 myEl = angular.element(document.querySelector('#padd'));
-    //                 myEl.html("GeoAddress: " + results[1].formatted_address);
-    //                 $scope.addr = true;
-    //             } else {
-    //                 console.log('No results found');
-    //             }
-    //         } else {
-    //             console.logs('Geocoder failed due to: ' + status);
-    //         }
-    //     });
-    // };
 
     $scope.processForm = function () {
 
@@ -232,9 +211,6 @@ addapp.controller('findControl', function($scope, $http){
     };
 
     $scope.fetchadd = function(){
-        var lat;
-        var long;
-        var qrcode;
         $http({
             method : 'POST',
             url : 'fetchaddress.php',
@@ -248,37 +224,28 @@ addapp.controller('findControl', function($scope, $http){
                 }
                 else
                 {
-                    console.log(response.data);
-                    if(!response.data.latlong)
+                    console.log("..........>"+JSON.stringify(response.data));
+                    if(!response.data.latlng)
                     {
-                        console.log("1");
-                        $scope.qrcode = "";
-                        $scope.qrcode = false;
                         $scope.adderror = "Digital Address not found";
                         locationMap.setZoom(5);
-                        locationMap.setCenter(new google.maps.LatLng(37.387474, -122.05754339999999));
+                        locationMap.setCenter(new google.maps.LatLng(latitude, longitude));
                     }
-                    else if (response.data.latlong)
+                    else if (response.data.latlng)
                     {
                         $scope.adderror = "";
                         $scope.adderror = false;
-                        console.log("2");
-                        var jsonlatlong = JSON.parse(response.data.latlong);
-                        $scope.lat = jsonlatlong.latitude;
-                        $scope.long = jsonlatlong.longitude;
+                        var jsonlatlng = JSON.parse(response.data.latlng);
+                        // $scope.lat = jsonlatlong.latitude;
+                        // $scope.long = jsonlatlong.longitude;
 
-                        //console.log(response.data);
-                        console.log(jsonlatlong.latitude);
-                        console.log(jsonlatlong.longitude);
-                        console.log(jsonlatlong.digital_address);
                         marker = new google.maps.Marker({
-                            position: new google.maps.LatLng(jsonlatlong.latitude, jsonlatlong.longitude),
+                            position: new google.maps.LatLng(jsonlatlng.latitude, jsonlatlng.longitude),
                             map: locationMap
                         });
 
-                        locationMap.setCenter(new google.maps.LatLng(jsonlatlong.latitude, jsonlatlong.longitude));
+                        locationMap.setCenter(new google.maps.LatLng(jsonlatlng.latitude, jsonlatlng.longitude));
                         locationMap.setZoom(18);
-                        $scope.qrcode = "qroutput/"+jsonlatlong.digital_address+".png";
                     }
 
                 }
