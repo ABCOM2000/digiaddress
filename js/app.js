@@ -224,7 +224,6 @@ addapp.controller('findControl', function($scope, $http){
                 }
                 else
                 {
-                    console.log("..........>"+JSON.stringify(response.data));
                     if(!response.data.latlng)
                     {
                         $scope.adderror = "Digital Address not found";
@@ -235,9 +234,8 @@ addapp.controller('findControl', function($scope, $http){
                     {
                         $scope.adderror = "";
                         $scope.adderror = false;
+
                         var jsonlatlng = JSON.parse(response.data.latlng);
-                        // $scope.lat = jsonlatlong.latitude;
-                        // $scope.long = jsonlatlong.longitude;
 
                         marker = new google.maps.Marker({
                             position: new google.maps.LatLng(jsonlatlng.latitude, jsonlatlng.longitude),
