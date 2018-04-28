@@ -4,10 +4,10 @@ include("general.php");
 $data = json_decode(file_get_contents("php://input"));
 
 $lat = $data->lat;
-$long = $data->long;
+$long = $data->lng;
 
-$obj = new dags();
-$conn = $obj->dbconnectDags();
+$obj = new databaseConnection();
+$conn = $obj->dbConnect();
 
 $digitaldata = file_get_contents("https://api.mapcode.com/mapcode/codes/".$lat.",".$long."?include=territory,alphabet&allowLog=true&client=web");
 

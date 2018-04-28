@@ -1,14 +1,12 @@
 var geocoder = null;
-var resmap = null;
+var locationMap = null;
 var marker = null;
 var rectangle = null;
-var tempadd = null;
-var add1 = "";
-var lat, long;
-var latlong;
+var lat, lng;
+// var latlong;
 
-var latvalue = 37.387474;
-var lngvalue = -122.05754339999999;
+var latitude = 37.387474;
+var longitude = -122.05754339999999;
 
 var app = angular.module('digitalAddressApp', []);
 
@@ -16,35 +14,14 @@ app.controller('digiAddressGenerator', function ($scope, $http) {
 
     $scope.initMap = function () {
         $(window).load(function () {
-            resmap = new google.maps.Map(document.getElementById('map'), {
+            locationMap = new google.maps.Map(document.getElementById('map'), {
                 zoom: 5,
-                center: {lat:latvalue, lng: lngvalue}
+                center: {lat:latitude, lng: longitude}
             });
             geocoder = new google.maps.Geocoder();
         });
 
     };
-
-    function addMarker(location) {
-        removeMarker();
-        removeRectangle();
-        latlong = null;
-        //console.log(location);
-        lat = location.lat();
-        long = location.lng();
-        $scope.address.lat = lat;
-        $scope.address.long = long;
-        latlong = lat + ", " + long;
-        myEl = angular.element(document.querySelector('#lt'));
-        myEl.html("GeoCoordinates: " + latlong);
-        $scope.latlong = true;
-        console.log("lat " + latlong);
-        marker = new google.maps.Marker({
-            position: location,
-            map: resmap
-        });
-        getAddress(location);
-    }
 
     function removeMarker() {
         if (marker !== null) {
@@ -69,36 +46,31 @@ app.controller('digiAddressGenerator', function ($scope, $http) {
 
             if (address !== null) {
 
-                var add = "";
-                var arr = [];
-
-                for (var key in address) {
-                    if (key !== 'lat' && key !== 'long')
-                        arr.push(address[key].toString());
-                }
-
-                for (var i = arr.length - 1; i >= 0; i--) {
-                    if (add === "")
-                        add = arr[i].toString();
-                    else
-                        add = add + ',' + arr[i].toString();
-                }
-
                 var fullAddress = "";
 
-                if (!address ['house']) {
+                if (address ['house']) {
+
+                    angular.element(document.getElementById('generate'))[0].disabled = false;
                     fullAddress = address ['house'] + ",";
                 }
                 if (address ['town']) {
+                    angular.element(document.getElementById('street'))[0].disabled = false;
+                    // angular.element(document.getElementById('street')).focus();
                     fullAddress = fullAddress + address ['town'] + ",";
                 }
                 if (address ['street']) {
+                    angular.element(document.getElementById('house'))[0].disabled = false;
+                    // angular.element(document.getElementById('house')).focus();
                     fullAddress = fullAddress + address ['street'] + ",";
                 }
                 if (address ['state']) {
+                    angular.element(document.getElementById('zip'))[0].disabled = false;
+                    // angular.element(document.getElementById('zip')).focus();
                     fullAddress = fullAddress + address ['state'] + " ";
                 }
                 if (address ['zip']) {
+                    angular.element(document.getElementById('town'))[0].disabled = false;
+                    // angular.element(document.getElementById('town')).focus();
                     fullAddress = fullAddress + address ['zip'];
                 }
                 console.log("address: " + fullAddress);
@@ -115,40 +87,40 @@ app.controller('digiAddressGenerator', function ($scope, $http) {
                  *  "place_id":"ChIJGSZubzgtC4gRVlkRZFCCFX8",
                  *  "types":["administrative_area_level_1","political"]}
                  */
-                if (add !== "") {
+                if (fullAddress !== "") {
                     $http({
                         method: 'POST',
                         url: 'geoimplement.php',
-                        data: {address: add},
+                        data: {address: fullAddress},
                         headers: {'Content-Type': 'application/x-www-form-urlencoded'}
 
                     }).then(function successCallback(results) {
 
                         if (results.data !== "false") {
-                            // console.log(results);
                             removeMarker();
                             removeRectangle();
 
                             $scope.address.lat = lat;
-                            $scope.address.long = long;
+                            $scope.address.lng = lng;
 
                             lat = results.data.geometry.location.lat;
-                            long = results.data.geometry.location.lng;
+                            lng = results.data.geometry.location.lng;
 
                             marker = new google.maps.Marker({
-                                map: resmap,
+                                map: locationMap,
                                 position: results.data.geometry.location
                             });
 
-                            myEl = angular.element(document.querySelector('#lt'));
-                            myEl.html("Geo Coordinate: " + lat + "," + long);
+                            geoCoordLabel = angular.element(document.querySelector('#lt'));
+                            geoCoordLabel.html("Geo Coordinate: " + lat + "," + lng);
 
-                            $scope.latlong = true;
-                            myEl = angular.element(document.querySelector('#padd'));
-                            myEl.html("Geo Address: " + add);
 
-                            $scope.addr = true;
-                            console.log(JSON.stringify(results.data));
+                            geoAddressLabel = angular.element(document.querySelector('#padd'));
+                            geoAddressLabel.html("Geo Address: " + fullAddress);
+
+
+                            // $scope.latlng = true;
+                            // $scope.addr = true;
 
                             if (results.data.geometry.viewport) {
 
@@ -158,7 +130,7 @@ app.controller('digiAddressGenerator', function ($scope, $http) {
                                     strokeWeight: 0.5,
                                     fillColor: '#FF0000',
                                     fillOpacity: 0.35,
-                                    map: resmap,
+                                    map: locationMap,
                                     bounds: {
                                         north: results.data.geometry.viewport.northeast.lat,
                                         south: results.data.geometry.viewport.southwest.lat,
@@ -167,53 +139,49 @@ app.controller('digiAddressGenerator', function ($scope, $http) {
                                     }
                                 });
 
-                                resmap.setCenter(new google.maps.LatLng(lat, long));
-
                                 var googleBounds = new google.maps.LatLngBounds(results.data.geometry.viewport.southwest, results.data.geometry.viewport.northeast);
 
-                                resmap.fitBounds(googleBounds);
+                                locationMap.setCenter(new google.maps.LatLng(lat, lng));
+                                locationMap.fitBounds(googleBounds);
                             }
-
                         } else {
-                            myEl = angular.element(document.querySelector('#lt'));
-                            myEl.html("Place not found.Please select location on map");
-                            $scope.latlong = true;
+                            errorLabel = angular.element(document.querySelector('#lt'));
+                            errorLabel.html("Place not found.");
+                            $scope.latlng = true;
                             removeRectangle();
-
                         }
 
                     }, function errorCallback(results) {
+                       console.log(results);
                     });
-
                 }
-                ;
             }
         }
     };
 
-
-    function getAddress(latlong) {
-        geocoder.geocode({
-            'latLng': latlong
-        }, function (results, status) {
-            if (status === google.maps.GeocoderStatus.OK) {
-                if (results[1]) {
-                    console.log(results[1].formatted_address);
-                    myEl = angular.element(document.querySelector('#padd'));
-                    myEl.html("GeoAddress: " + results[1].formatted_address);
-                    $scope.addr = true;
-                } else {
-                    console.log('No results found');
-                }
-            } else {
-                console.logs('Geocoder failed due to: ' + status);
-            }
-        });
-    };
+    //
+    // function getAddress(latlong) {
+    //     geocoder.geocode({
+    //         'latLng': latlong
+    //     }, function (results, status) {
+    //         if (status === google.maps.GeocoderStatus.OK) {
+    //             if (results[1]) {
+    //                 console.log(results[1].formatted_address);
+    //                 myEl = angular.element(document.querySelector('#padd'));
+    //                 myEl.html("GeoAddress: " + results[1].formatted_address);
+    //                 $scope.addr = true;
+    //             } else {
+    //                 console.log('No results found');
+    //             }
+    //         } else {
+    //             console.logs('Geocoder failed due to: ' + status);
+    //         }
+    //     });
+    // };
 
     $scope.processForm = function () {
 
-        var digiAdd = "";
+        var digiAddress = "";
         $http({
             method: 'POST',
             url: 'collectDigitalAddress.php',
@@ -225,15 +193,19 @@ app.controller('digiAddressGenerator', function ($scope, $http) {
                     console.log(response);
                 }
                 else if (response.data.status) {
-                    digiadd = response.data.status;
+
+                    digiAddress = response.data.status;
+
                     $scope.digiaddlabel = response.data.status;
+
                     $scope.state = null;
                     $scope.zip = null;
                     $scope.street = null;
                     $scope.town = null;
                     $scope.house = null;
 
-                    $scope.digiadd = digiadd;
+                    // $scope.digiadd = digiAddress;
+
                     $('#exampleModalCenter').modal('show');
                 }
             },
@@ -251,7 +223,7 @@ var addapp = angular.module('findAddressApp',[]);
 addapp.controller('findControl', function($scope, $http){
     $scope.initMap = function () {
         $(window).load(function (){
-            resmap = new google.maps.Map(document.getElementById('map'), {
+            locationMap = new google.maps.Map(document.getElementById('map'), {
                 zoom: 5,
                 center: {lat: 37.387474, lng: -122.05754339999999}
             });
@@ -284,8 +256,8 @@ addapp.controller('findControl', function($scope, $http){
                         $scope.qrcode = "";
                         $scope.qrcode = false;
                         $scope.adderror = "Digital Address not found";
-                        resmap.setZoom(5);
-                        resmap.setCenter(new google.maps.LatLng(37.387474, -122.05754339999999));
+                        locationMap.setZoom(5);
+                        locationMap.setCenter(new google.maps.LatLng(37.387474, -122.05754339999999));
                     }
                     else if (response.data.latlong)
                     {
@@ -302,11 +274,11 @@ addapp.controller('findControl', function($scope, $http){
                         console.log(jsonlatlong.digital_address);
                         marker = new google.maps.Marker({
                             position: new google.maps.LatLng(jsonlatlong.latitude, jsonlatlong.longitude),
-                            map: resmap
+                            map: locationMap
                         });
 
-                        resmap.setCenter(new google.maps.LatLng(jsonlatlong.latitude, jsonlatlong.longitude));
-                        resmap.setZoom(18);
+                        locationMap.setCenter(new google.maps.LatLng(jsonlatlong.latitude, jsonlatlong.longitude));
+                        locationMap.setZoom(18);
                         $scope.qrcode = "qroutput/"+jsonlatlong.digital_address+".png";
                     }
 

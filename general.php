@@ -5,9 +5,9 @@
  * Date: 4/25/18
  * Time: 3:05 PM
  */
-class dags
+class databaseConnection
 {
-    function dbconnectDags()
+    function dbConnect()
     {
         $dbname = "patralayam";
         $servername = "localhost";
