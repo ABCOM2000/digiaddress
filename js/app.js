@@ -3,7 +3,6 @@ var locationMap = null;
 var marker = null;
 var rectangle = null;
 var lat, lng;
-// var latlong;
 
 var latitude = 37.387474;
 var longitude = -122.05754339999999;
